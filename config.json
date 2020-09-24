@@ -1,9 +1,8 @@
 {
-	"guild": "Your support server ID goes here",
+	"guild": "727420256917782599",
 	"prefix": "!",
 	"roles": {
-		"bot": "Your bot role ID",
-		"mod": "Your moderator/support team role ID"
-	},
-	"token": "MY SUPER TOKEN"
+		"bot": "758683128692473888",
+		"mod": "753283575276896337"
+	}
 }
