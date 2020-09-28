@@ -1,11 +1,13 @@
 const Discord = require("discord.js");
-
+const db = require("quick.db");
 const config = require("./config.json");
 
 // declare the client
 const client = new Discord.Client();
-
-client.on("message", async message => {
+client.on("ready", () => {
+  console.log('Bot is online');
+})
+client.on("message", async (message) => {
   if(message.channel.type === "dm"){
     if(message.author.bot) return;
     if(message.content.includes("@everyone") || message.content.includes("@here")) return message.author.send("You can't use everyone/here mentions.")
@@ -23,7 +25,7 @@ client.on("message", async message => {
     if(!active || !found){
       active = {};
       let modrole = guild.roles.cache.get(config.roles.mod);
-      let everyone = guild.roles.cache.get(guild.defaultRole.id); // not sure if this works
+    //  let everyone = guild.roles.cache.get(guild.defaultRole.id); // Doesn't works
       let bot = guild.roles.cache.get(config.roles.bot);
       await table.add("ticket", 1)
       let actualticket = await table.get("ticket");
@@ -35,9 +37,9 @@ client.on("message", async message => {
         SEND_MESSAGES: true,
         READ_MESSAGE_HISTORY: true
       });
-      channel.createOverwrite(everyone, {
+     // channel.createOverwrite(everyone, { //will cause issues because 'everyone' is not defined
         VIEW_CHANNEL: false
-      });
+      //});
       channel.createOverwrite(bot, {
         VIEW_CHANNEL: true,
         SEND_MESSAGES: true,
@@ -46,9 +48,9 @@ client.on("message", async message => {
       })
       let author = message.author;
       const newChannel = new Discord.MessageEmbed()
-        .setColor(colors.success).setAuthor(author.tag, author.avatarURL())
+        .setColor('BLUE').setAuthor(author.tag, author.avatarURL())
         .setDescription(`Ticket #${actualticket} created.\nUser: ${author}\nID: ${author.id}`)
-        .setFooter(`${moment(new Date()).format("lll")}`)
+        //.setFooter(`${(new Date()).format("lll")}`) Doesn't works
       await client.channels.cache.get(channel.id).send(newChannel);
       var toSendAsNew = `Hello ${author.username}, your ticket #${actualticket} has been created.`;
       const newTicket = toSendAsNew;
@@ -122,7 +124,7 @@ client.on("message", async message => {
       var suspend = new Discord.MessageEmbed()
       .setDescription("⏸️ This thread has been **locked** and **suspended**. Do `b!continue` to cancel.")
       .setTimestamp()
-      .setColor(colors.yellow)
+      .setColor('YELLOW')
       message.channel.send({embed: suspend});
 	  return supportUser.send("Your ticket has been paused. We'll send you a message when we're ready to continue.")
     };
@@ -134,7 +136,7 @@ client.on("message", async message => {
       await table.delete(`suspended${support.targetID}`);
       var c = new Discord.MessageEmbed()
       .setDescription("▶️ This thread has been **unlocked**.")
-      .setColor(colors.success).setTimestamp()
+      .setColor('BLUE').setTimestamp()
       message.channel.send({embed: c});
       return supportUser.send("Hi! Your ticket isn't paused anymore and we're ready to continue.");
     }
@@ -165,7 +167,7 @@ client.on("message", async message => {
     if(message.content.toLowerCase() === `${config.prefix}complete`){
         var embed = new Discord.MessageEmbed()
         .setDescription(`Deleting this thread in **10** seconds...\n:lock: This thread has been locked and closed.`)
-        .setColor(colors.red).setTimestamp()
+        .setColor('RED').setTimestamp()
         message.channel.send({embed: embed})
         var timeout = 10000
         setTimeout(() => {end();}, timeout)
@@ -177,7 +179,6 @@ client.on("message", async message => {
         return supportUser.send(`Hello again! Your ticket #${actualticket} has been labelled as complete. Thanks for contacting us. If you wish to open a new ticket, feel free to message me.`)
       }
     };
-  }
-),
+  })
 
-client.login(process.env.token);
+client.login(config.token);
